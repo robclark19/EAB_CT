@@ -1,0 +1,50 @@
+---
+title: "EAB spatial analysis in R"
+output: html_document
+date: "2023-01-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+I started with the 20 EAB and 20 non-EAB data sets within the larger EAB_PROP_DATA_2.xlsx file. If we want to change the cutoff to a higher number, we can use an exclude function in R to chop out rows with <40 or <50 records.
+
+
+```{r input}
+
+
+eab.dat <- read.csv("./Data/Originals/20 EAB data.csv")
+
+noneab.dat <- read.csv("./Data/Originals/20 nonEAB.csv")
+
+#rename columns
+cnames <- c("Town", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "Totals")
+
+colnames(eab.dat) <- cnames
+colnames(noneab.dat) <- cnames
+  
+```
+
+## Summary of Data
+
+```{r data structure}
+str(eab.dat)
+
+```
+
+## Formatting for krieging
+
+```{r krieging prep}
+str(eab.dat)
+
+```
+
+## First go at krieging
+
+```{r krieging prep}
+str(eab.dat)
+
+```
