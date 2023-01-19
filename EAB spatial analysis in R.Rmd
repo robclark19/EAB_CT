@@ -6,6 +6,9 @@ date: "2023-01-19"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ape)
+library(geoR)
 ```
 
 ## Data
@@ -16,35 +19,69 @@ I started with the 20 EAB and 20 non-EAB data sets within the larger EAB_PROP_DA
 ```{r input}
 
 
-eab.dat <- read.csv("./Data/Originals/20 EAB data.csv")
+eab_dat <- read.csv("./Data/Originals/20 EAB data.csv")
 
-noneab.dat <- read.csv("./Data/Originals/20 nonEAB.csv")
+noneab_dat <- read.csv("./Data/Originals/20 nonEAB.csv")
 
 #rename columns
-cnames <- c("Town", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "Totals")
+cnames <- c("Town", "Y2012", "Y2013", "Y2014", "Y2015", "Y2016", "Y2017", "Y2018", "Y2019", "Y2020", "Y2021", "Y2022", "Totals")
 
-colnames(eab.dat) <- cnames
-colnames(noneab.dat) <- cnames
-  
+colnames(eab_dat) <- cnames
+colnames(noneab_dat) <- cnames
+
+#import lat and long from EAB_PROP_DATA.xslx. Converted to csv in excel to avoid import issues
+
+waypoints_dat <- read.csv("./Data/Originals/EAB_PROP_DATA.csv") %>% 
+  dplyr::select(c("Town","Lat","Long")) %>% # we only need the gps for towns from this dataset
+  rename(lon = Long)
+
+# merge waypoints onto both, drop the OG
+eab_dat <- eab_dat %>% left_join(waypoints_dat, by="Town") 
+
+noneab_dat <- noneab_dat %>% left_join(waypoints_dat, by="Town")
+   
 ```
 
 ## Summary of Data
 
+Visual inspection of the first several rows to make sure we're all set
+
 ```{r data structure}
-str(eab.dat)
+head(eab_dat)
 
 ```
 
-## Formatting for krieging
+## Moran's I
 
-```{r krieging prep}
-str(eab.dat)
+# Here I am testing to see if we can get some morans I tests for spatial autocorrelation
+# No p-value estimates for Y2012, but a full run with no errors on Y2021
+
+```{r morans}
+# https://stats.oarc.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/#:~:text=Moran's%20I%20is%20a%20measure,and%20then%20library(ape).
+
+
+eab_dists <- as.matrix(dist(cbind(eab_dat$Lon, eab_dat$Lat)))
+
+# inverse and replace diagonals with zeros to prepare matrix for Moran.I
+
+eab_dists_inv <- 1/eab_dists
+diag(eab_dists_inv) <- 0
+
+# morans test for 2012
+Moran.I(eab_dat$Y2012, eab_dists_inv, na.rm = TRUE)
+
+# morans test for 2021
+Moran.I(eab_dat$Y2021, eab_dists_inv, na.rm = TRUE)
 
 ```
 
 ## First go at krieging
 
 ```{r krieging prep}
-str(eab.dat)
+# https://stats.oarc.ucla.edu/r/faq/how-do-i-generate-a-variogram-for-spatial-data-in-r/
+
+
+
+summary(eab_dists)
 
 ```
