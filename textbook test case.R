@@ -90,7 +90,7 @@ plot(meuse.v, meuse.sph, cutoff=1000)
 
 
 # create sample variogram
-meuse.v <- gstat::variogram(Y2020 ~ 1, eab_spat)
+meuse.v <- gstat::variogram(log(Totals) ~ 1, eab_spat)
 
 # fit variogram model
 meuse.vfit <- gstat::fit.variogram(meuse.v, vgm(1, "Sph", 800, 1))

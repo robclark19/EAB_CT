@@ -67,11 +67,26 @@ eab_dists <- as.matrix(dist(cbind(eab_dat$lon, eab_dat$lat)))
 eab_dists_inv <- 1/eab_dists
 diag(eab_dists_inv) <- 0
 
-# morans test for 2012
-Moran.I(eab_dat$Y2012, eab_dists_inv, na.rm = TRUE)
-
-# morans test for 2021
+# morans test for 2021 as a test case with abundance only EAB data
 Moran.I(eab_dat$Y2021, eab_dists_inv, na.rm = TRUE)
+
+# loop to run Moran's I across all 10 years
+results <- list()
+for (i in 2012:2022) {
+  var_name <- paste0("Y", i)
+  command <- paste0("Moran.I(eab_dat$", var_name, ", eab_dists_inv, na.rm = TRUE)")
+  result <- eval(parse(text = command))
+  results[[i-2011]] <- result #this makes the loop start after 2011
+}
+
+# reformat the output from the loop above into a legible table
+results_df <- data.frame(year = paste0("Y", 2012:2022),
+                        observed = sapply(results, function(x) x$observed),
+                        expected = sapply(results, function(x) x$expected),
+                        sd = sapply(results, function(x) x$sd),
+                        p.value = sapply(results, function(x) x$p.value))
+
+
 
 ```
 
