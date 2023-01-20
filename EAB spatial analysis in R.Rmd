@@ -8,7 +8,7 @@ date: "2023-01-19"
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ape)
-library(geoR)
+library(gstat)
 ```
 
 ## Data
@@ -33,7 +33,7 @@ colnames(noneab_dat) <- cnames
 
 waypoints_dat <- read.csv("./Data/Originals/EAB_PROP_DATA.csv") %>% 
   dplyr::select(c("Town","Lat","Long")) %>% # we only need the gps for towns from this dataset
-  rename(lon = Long)
+  rename(lon = Long, lat = Lat) # quibble with upper cases
 
 # merge waypoints onto both, drop the OG
 eab_dat <- eab_dat %>% left_join(waypoints_dat, by="Town") 
@@ -60,7 +60,7 @@ head(eab_dat)
 # https://stats.oarc.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/#:~:text=Moran's%20I%20is%20a%20measure,and%20then%20library(ape).
 
 
-eab_dists <- as.matrix(dist(cbind(eab_dat$Lon, eab_dat$Lat)))
+eab_dists <- as.matrix(dist(cbind(eab_dat$lon, eab_dat$lat)))
 
 # inverse and replace diagonals with zeros to prepare matrix for Moran.I
 
@@ -75,13 +75,19 @@ Moran.I(eab_dat$Y2021, eab_dists_inv, na.rm = TRUE)
 
 ```
 
-## First go at krieging
+## First go at kriging
 
-```{r krieging prep}
-# https://stats.oarc.ucla.edu/r/faq/how-do-i-generate-a-variogram-for-spatial-data-in-r/
+```{r variograms}
+# https://zia207.github.io/geospatial-r-github.io/semivariogram-modeling.html
 
 
+```
 
-summary(eab_dists)
+
+## First go at variograms
+
+```{r variograms}
+# https://zia207.github.io/geospatial-r-github.io/semivariogram-modeling.html
+
 
 ```
