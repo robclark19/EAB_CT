@@ -42,12 +42,22 @@ noneab_dat <- noneab_dat %>% left_join(waypoints_dat, by="Town")
    
 ```
 
-## Summary of Data
+## Summary of Data and Proportions
 
 Visual inspection of the first several rows to make sure we're all set
 
 ```{r data structure}
 head(eab_dat)
+head(noneab_dat)
+
+dataframe_proportions <- eab_dat
+
+#loop through the columns
+for(i in 3:12){
+    #calculate the proportion for the current column
+    dataframe_proportions[,i] <- ifelse(noneab_dat[,i] == 0, NA, eab_dat[,i]/noneab_dat[,i])
+}
+
 
 ```
 
@@ -59,22 +69,26 @@ head(eab_dat)
 ```{r morans}
 # https://stats.oarc.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/#:~:text=Moran's%20I%20is%20a%20measure,and%20then%20library(ape).
 
+# Morans I for all EAB only is a mix of sig and non sig
+# Morans I for all beetles total is all high p-values (>.6)
+# Morans I for proportions is highly autocorrleated with p-values all < 0.001
 
-eab_dists <- as.matrix(dist(cbind(eab_dat$lon, eab_dat$lat)))
+# using dataframe_proportions following arcgis models and R results
+
+eab_dists <- as.matrix(dist(cbind(dataframe_proportions$lon, dataframe_proportions$lat)))
 
 # inverse and replace diagonals with zeros to prepare matrix for Moran.I
-
 eab_dists_inv <- 1/eab_dists
 diag(eab_dists_inv) <- 0
 
 # morans test for 2021 as a test case with abundance only EAB data
-Moran.I(eab_dat$Y2021, eab_dists_inv, na.rm = TRUE)
+Moran.I(dataframe_proportions$Y2021, eab_dists_inv, na.rm = TRUE)
 
 # loop to run Moran's I across all 10 years
 results <- list()
 for (i in 2012:2022) {
   var_name <- paste0("Y", i)
-  command <- paste0("Moran.I(eab_dat$", var_name, ", eab_dists_inv, na.rm = TRUE)")
+  command <- paste0("Moran.I(dataframe_proportions$", var_name, ", eab_dists_inv, na.rm = TRUE)")
   result <- eval(parse(text = command))
   results[[i-2011]] <- result #this makes the loop start after 2011
 }
@@ -86,7 +100,7 @@ results_df <- data.frame(year = paste0("Y", 2012:2022),
                         sd = sapply(results, function(x) x$sd),
                         p.value = sapply(results, function(x) x$p.value))
 
-
+results_df
 
 ```
 
