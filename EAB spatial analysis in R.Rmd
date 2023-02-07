@@ -11,7 +11,7 @@ library(ape)
 library(gstat)
 ```
 
-## Data
+# Data
 
 I started with the 20 EAB and 20 non-EAB data sets within the larger EAB_PROP_DATA_2.xlsx file. If we want to change the cutoff to a higher number, we can use an exclude function in R to chop out rows with <40 or <50 records.
 
@@ -42,13 +42,13 @@ noneab_dat <- noneab_dat %>% left_join(waypoints_dat, by="Town")
    
 ```
 
-## Summary of Data and Proportions
+# Summary of Data and Proportions
 
 Visual inspection of the first several rows to make sure we're all set
 
 ```{r data structure}
-head(eab_dat)
-head(noneab_dat)
+str(eab_dat)
+str(noneab_dat)
 
 dataframe_proportions <- eab_dat
 
@@ -61,10 +61,9 @@ for(i in 3:12){
 
 ```
 
-## Moran's I
+# Moran's I
 
-# Here I am testing to see if we can get some morans I tests for spatial autocorrelation
-# No p-value estimates for Y2012, but a full run with no errors on Y2021
+Here I am testing to see if we can get some morans I tests for spatial autocorrelation. No p-value estimates for Y2012, but a full run with no errors on Y2021
 
 ```{r morans}
 # https://stats.oarc.ucla.edu/r/faq/how-can-i-calculate-morans-i-in-r/#:~:text=Moran's%20I%20is%20a%20measure,and%20then%20library(ape).
@@ -104,16 +103,16 @@ results_df
 
 ```
 
-## First go at kriging
+# First go at kriging
 
-```{r variograms}
-# https://zia207.github.io/geospatial-r-github.io/semivariogram-modeling.html
+```{r kriging}
+# https://pages.cms.hu-berlin.de/EOL/gcg_quantitative-methods/Lab14_Kriging.html
 
 
 ```
 
 
-## First go at variograms
+# First go at variograms
 
 ```{r variograms}
 # https://zia207.github.io/geospatial-r-github.io/semivariogram-modeling.html
