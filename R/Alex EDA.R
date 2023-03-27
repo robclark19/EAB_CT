@@ -84,12 +84,15 @@ amcmc = list(n.batch=10,batch.length=100,accept.rate=0.3)
 out.grad2 = localgrad(dates=dates, coord.longlat=coord, Albers=c(40.5,42.5), n.samp=1000, amcmc=amcmc)
 summary.localgrad(out.grad2) #EAB
 
+png("./R/outputs/figureS2.png",width=1000,height=800)
 par(mar=c(5,6,4,1)+.1)
 plotgrad(out.grad2,
          cex.axis=0.5,cex.lab=0.75,
          pch=".",database="state",
          main="",
          xlim=c(-74.5,-71),ylim=c(40.5,42.5))
+dev.off()
+
 #Mean speed of spread is 20.53 km/yr
 #Median speed of spread if 17.01 km/yr
 
