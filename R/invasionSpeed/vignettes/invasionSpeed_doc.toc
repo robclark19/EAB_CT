@@ -1,0 +1,7 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
+\contentsline {section}{\numberline {2}Detecting continuous expansion}{2}{section.2}
+\contentsline {subsection}{\numberline {2.1}Fitting Gaussian process gradient models}{2}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Summary and visualization}{3}{subsection.2.2}
+\contentsline {section}{\numberline {3}Detecting long-range jumps}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}Rayleigh test}{3}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Radial expansion of gradient models}{5}{subsection.3.2}
