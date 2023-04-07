@@ -4,8 +4,9 @@ library(tidyverse)
 library(readxl)
 library(lme4)
 library(lmerTest)
-library(ggeffects)
+library(effect)
 library(showtext)
+
 
 font_add_google(name="Open Sans", family="Open Sans")
 showtext_opts(dpi = 300)
@@ -20,9 +21,24 @@ prey = read_xlsx("./Data/Extra/CleanPropdata.xlsx",sheet="AllCountR") |>
 dat = left_join(eab,prey,by=c('Site','year')) |>
   mutate(
     prop_eab = count_eab/count_all,
+    count_noneab = count_all-count_eab,
     year = as.double(year)
   ) |>
   as.data.frame()
+
+points = dat %>%
+  select(year,count_eab,count_all) %>%
+  filter(!is.na(count_all)) %>%
+  mutate(
+    count_eab = ifelse(is.na(count_eab),0,count_eab)
+  ) %>%
+  pmap_dfr(.,
+           function(year, count_eab, count_all) {
+             data.frame(year=year,
+                        eab = c( rep(1, count_eab),
+                                 rep(0, count_all - count_eab) ) )
+             }
+           )
 
 
 #### EAB INCIDENCE VS TIME ####
@@ -45,21 +61,42 @@ b = summary(full_model)$coefficients[,1][2]
 -b/(2*a)
 # peak is at year = 4.05
 
-# Plot the parabola
 basesize = 7
-ggpredict(full_model,terms="year [all]") %>%
-  ggplot(aes(x=x,y=predicted)) +
+as.data.frame(effects::effect('year',full_model,se=TRUE,xlevels=100)) %>%
+  ggplot(aes(x=year,y=fit)) +
+  geom_point(data=dat, aes(x=year,y=prop_eab), position=position_jitter(w=0.1,h=0.05), alpha = 0.33, size=0.2*basesize, stroke=0) +
+  # geom_point(data=points, aes(x=year,y=eab), position=position_jitter(w=0.5,h=0.05), alpha = 0.1, size=0.2*basesize, stroke=0) +
+  # geom_violin(data=points,aes(x=year,y=ifelse(eab==1,1.05,-0.05),group=eab), width=0.1, linewidth=0.2) +
   geom_line(size=0.2) +
-  geom_ribbon(aes(ymin=conf.low,ymax=conf.high),alpha=0.1) +
+  geom_ribbon(aes(ymin=fit-se,ymax=fit+se),alpha=0.1) +
   labs(title="",y="Proportion of EAB in Prey",x="Year Post-Detection") +
+  scale_y_continuous(breaks=seq(0,1,by=0.1)) +
   scale_x_continuous(breaks=seq(0,10,by=2)) +
   theme_bw() + theme(
-    text = element_text(size=basesize, family="Open Sans"),
-    axis.title = element_text(size=1.2*basesize),
+    text = element_text(size=0.9*basesize, family="Open Sans"),
+    axis.title = element_text(size=1.1*basesize),
     panel.grid = element_blank(),
+    panel.border = element_blank(),
+    axis.line = element_line(size=0.25),
     axis.ticks = element_line(size=0.1)
   )
-ggsave("./R/outputs/figure2.png",units="px",dpi=300,width=800,height=500,device=ragg::agg_png())
+ggsave("./R/outputs/figure2_revised.png",units="px",dpi=300,width=800,height=800,device=ragg::agg_png())
+
+# # Plot the parabola
+# basesize = 7
+# ggpredict(full_model,terms="year [all]") %>%
+#   ggplot(aes(x=x,y=predicted)) +
+#   geom_point()
+#   geom_line(size=0.2) +
+#   labs(title="",y="Proportion of EAB in Prey",x="Year Post-Detection") +
+#   scale_x_continuous(breaks=seq(0,10,by=2)) +
+#   theme_bw() + theme(
+#     text = element_text(size=basesize, family="Open Sans"),
+#     axis.title = element_text(size=1.2*basesize),
+#     panel.grid = element_blank(),
+#     axis.ticks = element_line(size=0.1)
+#   )
+# ggsave("./R/outputs/figure2.png",units="px",dpi=300,width=800,height=500,device=ragg::agg_png())
 
 # Plot at the site level
 ggpredict(full_model, terms=c("year","Site[all]"), type="re") |>
