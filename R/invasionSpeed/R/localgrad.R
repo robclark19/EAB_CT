@@ -161,13 +161,13 @@ localgrad <- function(dates, covar = NULL, coord.longlat, newcoord.longlat = NUL
   tuning <- lapply(starting,function(x){x/100})
   tuning$nu <- 0 # fix smoothness parameter at 1.5
 
-  if(is.na(knots) && is.na(amcmc)) {
+  if(is.na(knots) && !exists('amcmc')) {
     krige.out <- spLM(formula, coords=coord, starting=starting, tuning=tuning, priors=priors,
                       cov.model = "matern",  n.samples = n.samp, n.report = 500, verbose = verbose)
-  } else if(!is.na(knots) && is.na(amcmc)) {
+  } else if(!is.na(knots) && !exists('amcmc')) {
     krige.out <- spLM(formula, coords=coord, starting=starting, tuning=tuning, priors=priors,
                       cov.model = "matern",  n.samples = n.samp, n.report = 500, verbose = verbose, knots=knots)
-  } else if(is.na(knots) && !is.na(amcmc)) {
+  } else if(is.na(knots) && exists('amcmc')) {
     krige.out <- spLM(formula, coords=coord, starting=starting, tuning=tuning, priors=priors,
                       cov.model = "matern",  n.samples = n.samp, n.report = 500, verbose = verbose, amcmc=amcmc)
   } else {
